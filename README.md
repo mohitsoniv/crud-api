@@ -118,12 +118,17 @@ for the same reason — no failover requirement; production would use Multi-AZ.
 
 ## 5. Instance Sizing Rationale
 
-- **EC2:** single instance runs Nginx + both apps (PM2) + Jenkins. Jenkins' JVM
-  alone reserves ~600MB, and App2's build stage is memory-heavy, so a 1GB box
-  would OOM during CI. [FILL: state your actual EC2 type here — t3.medium
-  recommended for headroom; if smaller, note swap.] Disk: [FILL: your volume
-  size] gp3 — enough for two node_modules trees, Jenkins workspaces/build
-  history, and logs.
+- **EC2:** `t2.medium` (2 vCPU, 4GB RAM, burstable/credit-based). Runs Nginx +
+  both apps (PM2) + Jenkins on one box. Jenkins' JVM alone reserves ~600MB at
+  idle, and App2's `npm run build` / Prisma generate steps are memory-heavy
+  during CI — a 1GB or 2GB box risks OOM mid-build. 4GB gives enough headroom
+  for Jenkins + two Node processes + build spikes without needing swap.
+  `t2` instead of `t3` was not a deliberate choice — carried over from an
+  earlier setup step — but its 4GB RAM class still comfortably covers this
+  workload; a production setup would move to `t3.medium` for non-burstable,
+  more predictable CPU. Disk: 29GB gp2/gp3 root volume — currently 16% used
+  (4.5GB), comfortable headroom for two `node_modules` trees, Jenkins
+  workspaces/build history, and logs.
 - **RDS:** `db.t3.micro` (2 vCPU, 1GB) — sufficient for two small databases with
   few connections and no real load. Deliberately not oversized: an `m5.large`
   would be unjustifiable over-provisioning for this workload, which is itself a
