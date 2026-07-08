@@ -255,3 +255,4 @@ UnauthorizedOperation — confirming read works and write is impossible.
 Postgres, no React frontend), so the pipeline's "npm run build for React" step is
 N/A and documented as such. The app was also modified to load JWT keys from files
 rather than environment variables (see §6.5).
+
