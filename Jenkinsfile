@@ -24,13 +24,13 @@ pipeline {
             steps {
                 sh 'sudo -u ubuntu git -C $APP_DIR fetch origin master'
                 sh 'sudo -u ubuntu git -C $APP_DIR reset --hard origin/master'
-                sh 'cd $APP_DIR && sudo -u ubuntu npm install --omit=dev'
+                sh 'sudo -u ubuntu npm install --omit=dev --prefix $APP_DIR'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'cd $APP_DIR && sudo -u ubuntu npm test'
+                sh 'sudo -u ubuntu npm test --prefix $APP_DIR'
             }
         }
 
@@ -65,7 +65,7 @@ pipeline {
             script {
                 if (env.LAST_GOOD) {
                     sh "sudo -u ubuntu git -C $APP_DIR reset --hard ${env.LAST_GOOD}"
-                    sh 'cd $APP_DIR && sudo -u ubuntu npm install --omit=dev'
+                    sh 'sudo -u ubuntu npm install --omit=dev --prefix $APP_DIR'
                     sh 'sudo -u ubuntu pm2 restart $APP_NAME --update-env'
                     echo "Rolled back to ${env.LAST_GOOD} and restarted"
                 }
